@@ -16,8 +16,8 @@ Two datasets were combined after determining that no single source covered all f
 
 **Key preprocessing decisions:**
 - Galaxy Zoo's 3 elliptical subclasses (round smooth, in-between smooth, cigar-shaped) merged into single Elliptical class
-- Edge-on galaxies discarded entirely from the dataset
-- All images resized to 224×224 JPEG at preprocessing time to fit Kaggle's 19.5GB disk quota
+- Edge-on galaxies discarded — viewing angle makes spiral/elliptical distinction scientifically impossible from morphology alone
+- All images resized to 224×224 JPEG at preprocessing time to respect Kaggle's 19.5GB disk quota
 - WeightedRandomSampler used during training to handle class imbalance (elliptical ~17,000 vs nebula ~1,192)
 
 ---
@@ -30,13 +30,13 @@ Two datasets were combined after determining that no single source covered all f
 - Classification head replaced: `2048 → 512 (ReLU, Dropout 0.4) → 5`
 - Full model fine-tuned with differential learning rates per layer group
 
-| Layer Group | Learning Rate 
+| Layer Group | Learning Rate | Reasoning |
 |---|---|---|
-| conv1, bn1, layer1 | 1e-6 
-| layer2 | 1e-6
-| layer3 | 5e-5
-| layer4 | 1e-4 
-| fc (head) | 5e-4 
+| conv1, bn1, layer1 | 1e-6 | Preserve universal low-level features |
+| layer2 | 1e-6 | Same |
+| layer3 | 5e-5 | Moderate adaptation |
+| layer4 | 1e-4 | Task-specific, adapt more |
+| fc (head) | 5e-4 | Learns fastest |
 
 **Training configuration:**
 - Optimiser: AdamW (weight decay 1e-4)
@@ -46,7 +46,8 @@ Two datasets were combined after determining that no single source covered all f
 - Batch size: 64
 
 **Augmentation (training only):**
-RandomHorizontalFlip, RandomVerticalFlip, RandomRotation(180), RandomGrayscale(p=0.2), ColorJitter
+RandomHorizontalFlip, RandomVerticalFlip, RandomRotation(180), RandomGrayscale(p=0.2), ColorJitter — all justified by astronomical context (no canonical orientation in space; RandomGrayscale forces morphology-based learning over colour-based)
+
 ---
 
 ## 3. Final Validation Metrics
@@ -88,7 +89,7 @@ RandomHorizontalFlip, RandomVerticalFlip, RandomRotation(180), RandomGrayscale(p
 
 ## 5. Inference Time
 
-~660ms on Kaggle GPU
+*(To be measured and filled in — target per competition spec: under 5 seconds on consumer-grade hardware)*
 
 **To measure:**
 ```python
@@ -157,3 +158,9 @@ Trains ResNet-50 with differential learning rates on the merged dataset. Saves b
 | `predict.py` | Single image inference via CLI |
 | `gradcam.py` | GradCAM visualisation and analysis |
 | `app.py` | Gradio web demo |
+
+**GitHub:** `https://github.com/dhyeybuch/scale-odyssey`
+
+---
+
+*Note: Confusion matrix image and inference time measurements will be added before final submission. All other metrics reflect the current best checkpoint.*
