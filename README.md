@@ -30,7 +30,7 @@ Two datasets were combined after determining that no single source covered all f
 - Classification head replaced: `2048 → 512 (ReLU, Dropout 0.4) → 5`
 - Full model fine-tuned with differential learning rates per layer group
 
-| Layer Group | Learning Rate | Reasoning |
+| Layer Group | Learning Rate |
 |---|---|---|
 | conv1, bn1, layer1 | 1e-6 |
 | layer2 | 1e-6 |
